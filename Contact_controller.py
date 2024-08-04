@@ -9,8 +9,6 @@ import math
 import asyncio
 from plotly.utils import PlotlyJSONEncoder
 import aiofiles
-import gpsd
-from geopy.distance import geodesic
 import plotly.graph_objs as go
 
 from Math import Math
@@ -570,48 +568,6 @@ class RoverController(Math):
         await RoverController.write_report(message)
         logging.info(message)
 
-    # async def move_to_gps(self,gpsd):
-    #     """
-    #     Асинхронная функция для перемещения ровера
-    #     """
-    #     self.target_location=gpsd
-    #     # gps=GPS()
-    #     a=True
-    #     # Основной цикл
-    #     try:
-    #         current_location = gps.get_current_location()
-    #         dist = gps.distance_to_target(current_location, self.target_location)
-    #         x,y=current_location
-    #         gx,gy=self.target_location
-    #         dx = gx-x
-    #         dy = gy-y
-    #         target_angle = math.degrees(math.atan2(dy, dx))
-    #         logging.debug(f"Target coordinates (x: {gx}, y: {gy}). Current position (x: {x}, y: {y})")
-    #         logging.debug(f"Calculated target angle: {target_angle} degrees")
-
-    #         angle_to_turn = (target_angle - self.robot_state.orientation + 360) % 360
-    #         if angle_to_turn > 180:
-    #             angle_to_turn -= 360  # Оптимизация угла поворота
-    #         logging.debug(f"Calculated turn angle: {angle_to_turn} degrees")
-
-    #         await self.perform_spin_angle(angle_to_turn)
-    #         distance = math.sqrt(dx ** 2 + dy ** 2) * 100  # Расстояние в сантиметрах
-    #         logging.debug(f"Calculated distance to move: {distance}cm")
-
-    #         x=self.robot_state.x
-    #         y=self.robot_state.y
-            
-    #         # Обновляем положение робота
-    #         self.robot_state.x += distance * np.cos(np.radians(target_angle)) / 100
-    #         self.robot_state.y += distance * np.sin(np.radians(target_angle)) / 100
-    #         self.robot_state.orientation = target_angle
-    #         logging.debug(f"Updated robot state to (x: {self.robot_state.x}, y: {self.robot_state.y}, orientation: {self.robot_state.orientation})")
-
-    #         # self.robot_state.orientation=Robot_run(self).run_gps(gps,dx,dy,target_angle)
-    #         Run_Robot(x,y,gx,gy,self)
-    #     except KeyboardInterrupt:
-    #         print("Программа остановлена пользователем.")
-
     async def move_to_marker(self, marker_id):
         """
         Асинхронная функция для выполнения движения к указанному маркеру.
@@ -653,23 +609,8 @@ class RoverController(Math):
         Run_Robot(x,y,target['x'],target['y'],self)
         logging.info(f"Moved to marker {marker_id}: rotate to {target_angle}° and move {distance}cm.")
 
-# class gps:
-        
-#     def __init__(self):
-#         self.gpsd=gpsd.connect()
-    
-#     def get_current_location():
-#         packet = gpsd.get_current()
-#         if packet.mode >= 2:  # 2D фиксация или лучше
-#             lat = packet.lat
-#             lon = packet.lon
-#             return (lat, lon)
-#         else:
-#             raise Exception("GPS-сигнал не найден")
-    
-#     def distance_to_target(current_location, target_location):
-#         return geodesic(current_location, target_location).meters    
-#         # Допишите логику движения (изменение направления робота/транспортного средства)
+
+
         
 
 # def call_function2(self):

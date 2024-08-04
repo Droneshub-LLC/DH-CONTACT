@@ -41,13 +41,9 @@ class Robot_run:
     - __init__: Инициализация объекта Robot_run
     - degres: Поворот робота на определённый градус
     - movment: движение на определённое расстояние (в см) и запись n-ых координат
-    - movment_gps: движение на определённое расстояние (в см) и запись текущей позиции по GPS
     - degres_to_mark: поворот к конечной точке
     - distance: расчёт расстояния до конечной точки
-    - distance_gps: расчёт расстояния до конечной точки по GPS
-    - calculate_bearing: расчёт градусов до конечной точки с использованием GPS
     - run: движение до конечной аруко метки
-    - run_gps: движение до конечной точки GPS
     """
     
     def __init__(self,controller):
@@ -108,10 +104,6 @@ class Robot_run:
         self.rc.perform_movement(distance)
         self.x += distance * np.cos(np.radians(self.target_angle)) / 100
         self.y += distance * np.sin(np.radians(self.target_angle)) / 100
-        
-    # def movment_gps(self,distance):
-    #     self.rc.perform_movement(distance)
-    #     self.x,self.y=self.class_on_gps.get_current_location()
     
     def degres_to_mark(self):
         """
@@ -146,9 +138,6 @@ class Robot_run:
         dx = self.x_g - self.x
         dy = self.y_g - self.y
         return math.sqrt(dx ** 2 + dy ** 2) * 100 
-    
-    # def distance_gps(self):
-    #     return self.class_on_gps.distance_to_target((self.x,self.y),(self.x_g,self.y_g))
     
     def calculate_bearing(self):
         """
@@ -268,78 +257,7 @@ class Robot_run:
             cv2.destroyAllWindows()
         return self.target_angle
     
-    
-    
-    # def run_gps(self,class_on_gps,x_goal,y_goal,target_angle):
-    #     self.x,self.y=class_on_gps.get_current_location()
-    #     self.class_on_gps=class_on_gps
-    #     self.x_g=x_goal
-    #     self.y_g=y_goal
-    #     self.target_angle=target_angle
-    #     pipeline.start(config)
-    #     time_to_rotton=0
-    #     a=True
-    #     def sbros(time_to_rotton,a):
-    #         if time_to_rotton!=0 and a:
-    #             return 0
-    #         else:
-    #             return time_to_rotton
-    #     try:
-    #         # Ждем следующего кадра
-    #         while True:
-    #             frames = pipeline.wait_for_frames()
-    #             depth_frame = frames.get_depth_frame()
-    #             color_frame = frames.get_color_frame()
 
-    #             # Преобразование изображений глубины и цвета в массивы NumPy
-    #             depth_image = np.asanyarray(depth_frame.get_data())
-    #             color_image = np.asanyarray(color_frame.get_data())
-
-    #             # Применение порога к изображению глубины для обнаружения препятствий
-    #             depth_threshold = 250 # в миллиметрах
-    #             obstacle_mask = np.where((depth_image > 0) & (depth_image < depth_threshold), 1, 0)
-
-    #             # Определение центра масс препятствия
-    #             moments = cv2.moments(obstacle_mask.astype(np.uint8))
-    #             if moments['m00'] != 0:
-    #                 cx = int(moments['m10']/moments['m00'])
-    #                 cy = int(moments['m01']/moments['m00'])
-    #                 # Действие в зависимости от положения препятствия
-    #                 if cx < 320: # Препятствие слева
-    #                     time_to_rotton=sbros(time_to_rotton,a)
-    #                     # print("Поворот направо")
-    #                     time_to_rotton=time_to_rotton+time_to_rot(5)
-    #                     self.degres(self.target_angle+5)
-    #                     # print(time_to_rotton)
-    #                     a=False
-    #                 elif cx > 320: # Препятствие справа
-    #                     time_to_rotton=sbros(time_to_rotton,a)
-    #                     # print("Поворот налево")
-    #                     time_to_rotton=time_to_rotton+time_to_rot(5)
-    #                     self.degres(self.target_angle-5)
-    #                     # print(time_to_rotton)
-    #                     a=False
-                        
-    #             else:
-    #                 # print("Препятствий нет, продолжаем движение")
-    #                 if time_to_rotton!=0:
-    #                     grad=time_to_rotton*120
-    #                     distance=abs((depth_threshold/10)/math.cos(math.degrees(grad))+60)
-    #                     self.movment(distance)
-    #                     self.degres(self.calculate_bearing())
-    #                     time_to_rotton=0
-    #                     a=True            
-    #                 else:
-    #                     if self.distance()<3:
-    #                         break
-    #                     self.movment(1)
-    #     finally:
-    #         # Остановка потоков
-    #         pipeline.stop()
-    #         cv2.destroyAllWindows()
-    #     return self.target_angle
-    
-Robot_run().run(5,5,5,10,90)
     
         
     
