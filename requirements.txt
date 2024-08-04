@@ -1,0 +1,9 @@
+aiofiles
+asyncio
+opencv-python-headless  # Используйте opencv-python, если нужна поддержка GUI
+opencv-python
+numpy
+scipy
+ultralytics
+python-socketio[asyncio_client]
+matplotlib

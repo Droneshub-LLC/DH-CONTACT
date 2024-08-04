@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Видеопоток и Plotly График</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            /* Градиентный фон от темно-синего к более светлому оттенку */
+            background: linear-gradient(to right, #00008B, #0000CD);
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+        #video-stream, #plotly-graph {
+            flex-grow: 1;
+            flex-shrink: 1;
+            flex-basis: 0;
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            /* Закругление углов */
+            border-radius: 15px;
+            /* Добавляем немного тени для эффекта глубины */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            /* Фоновый цвет элементов для лучшей видимости на градиентном фоне */
+            background: rgba(255, 255, 255, 0.8);
+        }
+      </style>
+      
+</head>
+<body>
+    <div class="container">
+        <div id="video-stream">
+          <h1>Видеопоток с камеры</h1>
+          <!-- Место для видеопотока -->
+        </div>
+      
+        <div id="plotly-graph">
+          <h1>Навигатор</h1>
+          <!-- Место для графика Plotly -->
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            // Подключаемся к WebSocket
+            var ws = new WebSocket("ws://localhost:8888/websocket");
+            
+            ws.onopen = function() {
+                console.log("Соединение установлено.");
+                // Запрашиваем начальные данные для графика и видео
+                ws.send(JSON.stringify({type: 'init', content: 'all'}));
+            };
+
+            ws.onmessage = function(event) {
+                var message = JSON.parse(event.data);
+                
+                // Обновляем график, если пришли данные для графика
+                if (message.type === 'plot') {
+                    var plotData = JSON.parse(message.plot);
+                    Plotly.react('plotly-graph', plotData.data, plotData.layout);
+                }
+                
+                // Обновляем видеопоток, если пришел новый кадр
+                if (message.type === 'frame') {
+                    updateImage(message.frame);
+                }
+            };
+
+            ws.onclose = function(event) {
+                if (event.wasClean) {
+                    console.log('Соединение закрыто чисто');
+                } else {
+                    console.log('Обрыв соединения');
+                }
+                console.log('Код: ' + event.code + ' причина: ' + event.reason);
+            };
+
+            ws.onerror = function(error) {
+                console.log("Ошибка " + error.message);
+            };
+
+            function updateImage(newFrame) {
+                // Находим элемент img на странице
+                var img = document.querySelector('#video-stream img');
+                // Если элемент img существует, обновляем его источник
+                if (img) {
+                    img.src = 'data:image/jpeg;base64,' + newFrame;
+                } else {
+                    // Если элемент img не найден, создаем новый и добавляем на страницу
+                    img = document.createElement('img');
+                    img.src = 'data:image/jpeg;base64,' + newFrame;
+                    document.querySelector('#video-stream').appendChild(img);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
