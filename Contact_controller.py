@@ -324,7 +324,7 @@ class RoverController(Math):
     - socketio: для работы с Socket.IO клиентом
     """
 
-    def __init__(self, aruco_map, robot_state, server_url, token):
+    def __init__(self, aruco_map, robot_state):
         """
         Конструктор класса. Инициализирует карту маркеров ArUco, состояние робота, URL сервера и токен авторизации.
 
