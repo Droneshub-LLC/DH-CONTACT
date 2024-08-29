@@ -12,7 +12,7 @@ import aiofiles
 import plotly.graph_objs as go
 
 from Math import Math
-# from Frenet_frame import Run_Robot
+from Frenet_frame import Run_Robot
 
 # класс представляет собой шаблон для контроллера робота
 class RobotController:
