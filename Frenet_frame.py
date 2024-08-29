@@ -29,34 +29,6 @@ transform = Affine2D().rotate_deg(90)
 # Создаем маркер в форме треугольника
 triangle = markers.MarkerStyle('v')
 
-# клиент сервера реалсенса
-try:
-    sd=Realsense('localhost',5527)
-except Exception as e:
-    print(e)
-    
-    
-# фигура для отправки на сайт
-global ax
-ax = go.Figure()  
-ax.update_layout(showlegend=False)
-
-# сервер сайта
-host = 'localhost'
-port = 5530
-
-# Инициализация клиентского сокета
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect((host, port))
-client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65536)
-
-# Определение обработчика запросов к главной странице
-def create_plotly_figure():
-    global ax,f
-    # Создаем фигуру и добавляем график
-    while True:
-        fig_json = json.dumps(ax, cls=PlotlyJSONEncoder)
-        client_socket.sendall(f"{fig_json}".encode('utf-8'))
 tracemalloc.start()    
     
 SIM_LOOP = 5000
@@ -407,7 +379,7 @@ def calculate_relative_angle(x, center_x=360, max_angle=50):
         relative_angle = max_angle
     return -relative_angle
 
-def mass(xs,ys,tar):
+def mass(xs,ys,tar,sd):
     """
     Обработка данных о массе и расчёт новых координат.
 
@@ -519,7 +491,37 @@ def main(x,y,dx,dy,con=None):
     Возвращает:
     - None
     """
+    # клиент сервера реалсенса
+    sd=None
+    try:
+        sd=Realsense('localhost',5527)
+    except Exception as e:
+        print(e)
+        
+        
+    # фигура для отправки на сайт
     global ax
+    ax = go.Figure()  
+    ax.update_layout(showlegend=False)
+
+    # сервер сайта
+    host = 'localhost'
+    port = 5530
+
+    # Инициализация клиентского сокета
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((host, port))
+    client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65536)
+
+    # Определение обработчика запросов к главной странице
+    def create_plotly_figure():
+        global ax,f
+        # Создаем фигуру и добавляем график
+        while True:
+            fig_json = json.dumps(ax, cls=PlotlyJSONEncoder)
+            client_socket.sendall(f"{fig_json}".encode('utf-8'))
+
+
     print(__file__ + " start!!")
 
     # way points
@@ -548,16 +550,16 @@ def main(x,y,dx,dy,con=None):
         
         if i>0:
             ob=np.array([[0.0,-50.0]])
-            ob = np.append(ob, mass(0, 0,90), axis=0)
-            # ob = np.append(ob, mass(path.x[1], path.y[1],target_angle), axis=0)
+            # ob = np.append(ob, mass(0, 0,90), axis=0)
+            ob = np.append(ob, mass(path.x[1], path.y[1],target_angle,sd), axis=0)
 
         path = frenet_optimal_planning(
             csp, 0, c_speed, c_accel, c_d, c_d_d, c_d_dd, ob)
         s0 = 0
-        c_d = 0.00000000000000001
-        c_d_d = 0.0000000000000000001
-        c_d_dd = 0.0000000000000000001
-        c_speed = 0.00000000000000000000000000001
+        c_d = 0.1
+        c_d_d = 0.1
+        c_d_dd = 0.01
+        c_speed = 0.001
         c_accel = 0
         angle=degres_to_mark(path.x[0],path.y[0],path.x[1],path.y[1])-target_angle
         triangle._transform = triangle.get_transform().rotate_deg(angle)
@@ -566,47 +568,45 @@ def main(x,y,dx,dy,con=None):
         if np.hypot(path.x[1] - tx[-1], path.y[1] - ty[-1]) <= 1.0:
             print("Goal")
             break
-        
-        if show_animation:  # pragma: no cover
-            ax.data=[]
-            ax.add_trace(go.Scatter(
-                x=tx,
-                y=ty,
-                mode='lines+markers',
-                name='Траектория'
-            ))
-            ax.add_trace(go.Scatter(
-                x=ob[:, 0],
-                y=ob[:, 1],
-                mode='markers',
-                name='Препятствия',
-                marker=dict(color='black')
-            ))
-            ax.add_trace(go.Scatter(
-                x=path.x[1:],
-                y=path.y[1:],
-                mode='lines+markers',
-                name='Путь',
-                marker=dict(color='red')
-            ))
-            # Для треугольника используйте 'triangle-up' и задайте размер
-            ax.add_trace(go.Scatter(
-                x=[path.x[1]],
-                y=[path.y[1]],
-                mode='markers',
-                name='Начальная точка',
-                marker=dict(symbol='triangle-up', size=15)
-            ))
+        ax.data=[]
+        ax.add_trace(go.Scatter(
+            x=tx,
+            y=ty,
+            mode='lines+markers',
+            name='Траектория'
+        ))
+        ax.add_trace(go.Scatter(
+            x=ob[:, 0],
+            y=ob[:, 1],
+            mode='markers',
+            name='Препятствия',
+            marker=dict(color='black')
+        ))
+        ax.add_trace(go.Scatter(
+            x=path.x[1:],
+            y=path.y[1:],
+            mode='lines+markers',
+            name='Путь',
+            marker=dict(color='red')
+        ))
+        # Для треугольника используйте 'triangle-up' и задайте размер
+        ax.add_trace(go.Scatter(
+            x=[path.x[1]],
+            y=[path.y[1]],
+            mode='markers',
+            name='Начальная точка',
+            marker=dict(symbol='triangle-up', size=15)
+        ))
 
-            ax.layout=go.Layout(
-                title=f"v[km/h]:{str(c_speed * 3.6)[:4]}",
-                xaxis=dict(range=[path.x[1]-area, path.x[1]+area]),
-                yaxis=dict(range=[path.y[1]-area, path.y[1]+area]),
-                showlegend=False,
-                height=800
-            )
+        ax.layout=go.Layout(
+            title=f"v[km/h]:{str(c_speed * 3.6)[:4]}",
+            xaxis=dict(range=[path.x[1]-area, path.x[1]+area]),
+            yaxis=dict(range=[path.y[1]-area, path.y[1]+area]),
+            showlegend=False,
+            height=800
+        )
         
-        else:
+        if not show_animation:  # pragma: no cover
             con.go(c_d_dd,c_accel)
             
     print("Finish")
@@ -630,24 +630,3 @@ class Run_Robot():
     def going_to_coor_aruco(self):
         main(self.x,self.y,self.dx,self.dy,self.con)  
         
-
-async def mains():
-    """
-    запуск основного процесса и потока отправки данных на сайт
-
-    Библиотеки:
-    - threading: для создания отедльного потока
-
-    Описание:
-    Запускает основной код и так же появляется отедльный поток с бесконечным циклом на тправку данных на сайт
-    """
-    socket_thread = threading.Thread(target=create_plotly_figure, daemon=True)
-    socket_thread.start()
-    with contextlib.suppress(KeyboardInterrupt):
-        # Запуск сервера Tornado
-        main(0,0,0,70)
-        socket_thread.join()
-
-
-if __name__ == '__main__':
-    asyncio.run(mains())
