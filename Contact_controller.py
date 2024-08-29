@@ -340,7 +340,6 @@ class RoverController(Math):
         self.lights_on = False  # Состояние света
         self.graph = Math.build_graph(self=self)  # Построение графа на основе карты маркеров
         self.closestmarkers = Math.find_closest_marker_id(self=self)
-        self.plot_map()  # Отображение карты маркеров на графике 
 
 
     async def initialize_socketio(self):
