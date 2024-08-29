@@ -102,7 +102,7 @@ async def main(use_simulator):
         controller = SimulationController(aruco_map, robot_state, ax,HOST_SOCKET,PORT_SOCKET)
     else:
         # Инициализируем контроллер робота для реального управления
-        controller = RoverController(aruco_map, robot_state, SERVER_URL, TOKEN)
+        controller = RoverController(aruco_map, robot_state)
     
     # инициализация сервера yolo для дальнейшей работы с ней
     yolo=Connect_yolo(IP_ADDRESS,PORT_YOLO,RTSP_LINK)
