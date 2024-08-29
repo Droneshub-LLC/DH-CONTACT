@@ -17,30 +17,6 @@ logging.basicConfig(level=logging.INFO)
 
 # Инициализация модели YOLO
 model = YOLO("yolov8n")
-
-class Realsense:
-    def __init__(self,IP,PORT): #надо порты сделшать
-        host = IP
-        port = PORT
-        self.buffer_size = 10000
-
-        # Инициализация клиентского сокета
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect((host, port))
-        self.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 2048)
-        
-    def receive_data(self,sock):
-        sock.sendall(f"{0}".encode('utf-8'))
-        data = sock.recv(self.buffer_size).decode('utf-8')
-        return data
-            
-    def give_mass(self):
-        try:
-            # Получение данных от сервера
-            data = self.receive_data(self.client_socket)
-            return eval(data)
-        except Exception as e:
-            print(f"Ошибка: {e}")
             
 class Connect_aruco: 
     """
