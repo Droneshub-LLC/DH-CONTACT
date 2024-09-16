@@ -26,7 +26,7 @@ PORT_SERVO      = 5520
 PORT_RELE       = 5525
 SERVER_URL      = f'http://{IP_ADDRESS}:{SERVER_PORT}/'
 RTSP_LINK       = f'rtsp://{IP_ADDRESS}:{RTSP_PORT}/web'
-TOKEN           = 'eyJhbGciOiJIUzI1NiIsInR5cCI6Imp3dCJ9.eyJ1c2VybmFtZSI6InRlc3QiLCJpZCI6MX0=.OrS7h72zhJH1EY49vpxiO1FizR71r/SHSoSky87I728='  # Токен аутентификации
+TOKEN           = 'your_tocken'  # Токен аутентификации
 HOST_SOCKET     = 'localhost'
 PORT_SOCKET     = 5530
 PORT_SITE       = 8888
